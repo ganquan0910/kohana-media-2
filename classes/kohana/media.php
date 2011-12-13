@@ -39,6 +39,44 @@ class Kohana_Media {
 	}
 
 	/**
+	 * Characters for compress
+	 *
+	 * @var string
+	 */
+	protected static $_codeset = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+	/**
+	 * Number of characters in codeset
+	 *
+	 * @var integer
+	 */
+	protected static $_base;
+
+	/**
+	 * Compress file modification time
+	 *
+	 * @param   integer  $mtime  String to compress
+	 * @return  string  Compressed string
+	 */
+	public static function compress($mtime)
+	{
+		if (empty(self::$_base))
+		{
+			self::$_base = strlen(self::$_codeset);
+		}
+
+		$compressed = '';
+
+		while ($mtime > self::$_base - 1)
+		{
+			$compressed = self::$_codeset[fmod($mtime, self::$_base)].$compressed;
+			$mtime      = floor($mtime / self::$_base);
+		}
+
+		return $compressed;
+	}
+
+	/**
 	 * Config
 	 *
 	 * @var array
@@ -120,7 +158,7 @@ class Kohana_Media {
 			pathinfo($filename, PATHINFO_EXTENSION) == $this->_instance)
 		{
 			$this->_files[ (int) $priority][] = $filename;
-			$this->_mtimes[$filename]         = filemtime($this->_path.$filename);
+			$this->_mtimes[$filename]         = Media::compress(filemtime($this->_path.$filename));
 		}
 
 		return $this;

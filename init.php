@@ -2,7 +2,7 @@
 
 $public_directory = Kohana::$config->load('media')->public_directory;
 
-Route::set('media', $public_directory.'/<file>(?<mtime>)', array('file' => '.+', 'mtime' => '%d'))
+Route::set('media', $public_directory.'/<file>(?<mtime>)', array('file' => '.+'))
 	->defaults(array(
 		'controller' => 'media',
 		'action'     => 'plain'
