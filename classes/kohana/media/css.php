@@ -63,7 +63,7 @@ class Kohana_Media_Css implements Kohana_Media_Interface {
 				}
 			}
 
-			return HTML::style(Route::get('media')->uri(array('file' => $file, 'mtime' => self::compress($mtime))));
+			return HTML::style(Route::get('media')->uri(array('file' => $file, 'mtime' => Media::compress($mtime))));
 		}
 
 		$content = '';
@@ -80,7 +80,7 @@ class Kohana_Media_Css implements Kohana_Media_Interface {
 				}
 			}
 
-			$content .= HTML::style(Route::get('media')->uri(array('file' => $file, 'mtime' => self::compress($mtime))));
+			$content .= HTML::style(Route::get('media')->uri(array('file' => $file, 'mtime' => Media::compress($mtime))));
 		}
 
 		return $content;
