@@ -178,7 +178,7 @@ class Kohana_Media {
 		}
 
 		$this->_files[ (int) $priority][] = $filename;
-		$this->_mtimes[$filename]         = self::compress(filemtime($file));
+		$this->_mtimes[$filename]         = filemtime($file);
 
 		return $this;
 	}
