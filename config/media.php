@@ -15,6 +15,8 @@ return array
 	 */
 	'merge' => $production,
 
+	'debug' => ! $production,
+
 	 /**
 	 * Delimiter
 	 */
@@ -25,17 +27,17 @@ return array
 	 */
 	'filters' => array
 	(
-		'js'  => array('js'),
-		'css' => array('css')
+		'js'  => array(),
+		'css' => array()
 	),
 
-	 /**
-	 * Located in DOCROOT
-	 */
-	'public_directory' => 'media',
+	'warn_extensions' => array
+	(
+		'php', 'htaccess'
+	),
 
-	 /**
-	 * Located in APPPATH (or in modules)
+	/**
+	 * Directory to store media files
 	 */
 	'media_directory' => 'media',
 

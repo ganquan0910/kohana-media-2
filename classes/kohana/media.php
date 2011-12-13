@@ -102,7 +102,7 @@ class Kohana_Media {
 		$this->_config   = $config;
 		$this->_instance = $instance;
 
-		$this->_path     = APPPATH.$config['media_directory'].DIRECTORY_SEPARATOR;
+		$this->_path     = $config['media_directory'].DIRECTORY_SEPARATOR;
 	}
 
 	/**
@@ -137,12 +137,23 @@ class Kohana_Media {
 	/**
 	 * Add static file to minify
 	 *
-	 * @param    string   $file       Filename
+	 * @param    mixed    $file       Filename or array of files
 	 * @param    integer  $priority   Order priority
+	 * @param    boolean  $force      Force add file (without checking for the existence of)
 	 * @return   Media
 	 */
-	public function add_file($filename, $priority = Media::PRIORITY_MEDIUM)
+	public function add_file($filename, $priority = Media::PRIORITY_MEDIUM, $force = FALSE)
 	{
+		if (is_array($filename))
+		{
+			foreach($filename as $file)
+			{
+				$this->add_file($file, $priority, $force);
+			}
+
+			return $this;
+		}
+
 		// Who knows
 		$filename = $this->_clean_filename($filename);
 
@@ -154,12 +165,20 @@ class Kohana_Media {
 			return $this;
 		}
 
-		if (is_file($this->_path.$filename) AND
-			pathinfo($filename, PATHINFO_EXTENSION) == $this->_instance)
+		$info = pathinfo($this->_path.$filename);
+		$file = Kohana::find_file($info['dirname'], $info['filename'], $info['extension']);
+
+		if ( ! $force)
 		{
-			$this->_files[ (int) $priority][] = $filename;
-			$this->_mtimes[$filename]         = Media::compress(filemtime($this->_path.$filename));
+			if ( ! $file OR
+				$info['extension'] != $this->_instance)
+			{
+				return $this;
+			}
 		}
+
+		$this->_files[ (int) $priority][] = $filename;
+		$this->_mtimes[$filename]         = self::compress(filemtime($file));
 
 		return $this;
 	}
@@ -198,6 +217,61 @@ class Kohana_Media {
 			$this->_source = array();
 
 		return $this;
+	}
+
+	/**
+	 * Cleans all generated media files
+	 *
+	 * @param   string  $directory  Directory to clean
+	 * @return  array   Information about removed files and directories
+	 */
+	public static function erase()
+	{
+		$directory = DOCROOT.Kohana::$config->load('media')->public_directory;
+		$args      = func_get_args();
+
+		if ( ! isset($args[0]))
+		{
+			$directories = Kohana::list_files(Kohana::$config->load('media')->public_directory, array(DOCROOT));
+		}
+		else
+		{
+			$directories = $args[0];
+		}
+
+		$dirs = $files = $size = 0;
+
+		foreach ($directories as $key => $val)
+		{
+			$current = DOCROOT.$key;
+
+			if (is_array($val))
+			{
+				$dirs++;
+
+				list($sub_dirs, $sub_files, $sub_size) = self::erase($val);
+
+				$dirs  += $sub_dirs;
+				$files += $sub_files;
+				$size  += $sub_size;
+
+				rmdir($current);
+			}
+			else
+			{
+				$files++;
+				$size += filesize($val);
+
+				unlink($val);
+			}
+		}
+
+		return array
+		(
+			$dirs,
+			$files,
+			$size
+		);
 	}
 
 	/**
